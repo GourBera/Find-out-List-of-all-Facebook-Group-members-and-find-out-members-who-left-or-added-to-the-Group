@@ -1,0 +1,110 @@
+'''
+Created on Mar 16, 2018
+@author: berag
+
+To get the list of all members inside any Facebook Group and to find out if any member or members left the particular Group and 
+if any member or members added to that particular group 
+
+Prerequest :
+1. Facebook Group ID
+2. Facebook API Access Token
+
+
+Description:
+
+Based on the GroupID and Access Token it will fetch all the list of group members and others details. 
+Then from the API response, it will extract each member name and id.
+Then it will create a table “NewGroupTB” in SQLite database and store the data inside.
+You will be able to view the table data using the function “viewTBByName(tablename)”.
+Then you can update the Group, you can add or remove some members from the Group.
+Then Execute the Script – it will first rename the “NewGroupTB” to “OldGroupTB”, create a new table “NewGroupTB” and store the updated data inside it.
+Then fetch data from both the table and find out the differences.
+Then using condition if the differences found in OldGroupTB then reply saying members left the group with their name and id else new member added to the group with their name and id.
+
+'''
+
+import facebook
+from setuptools import setup
+from facepy import GraphAPI
+import sqlite3, time
+
+
+
+if __name__ == '__main__':
+    pass
+
+def getGroupMembers(group_id,access_token):
+    graph = GraphAPI(access_token)
+    data = graph.get(group_id + "/members")
+    print(data)
+    
+    db =  sqlite3.connect("Group.db")
+    c = db.cursor()
+    c.execute("""DROP TABLE OldGroupTB""")
+    
+    c.execute("""ALTER TABLE NewGroupTB RENAME TO OldGroupTB""");
+    
+    c.execute("""CREATE TABLE NewGroupTB(MNo INTEGER PRIMARY KEY, name VARCHAR(25) NOT NULL, Mid VARCHAR(25) NOT NULL)""")
+
+    for i in data['data']:
+        d =i['name'],i['id']
+        c.execute('INSERT INTO NewGroupTB(name,Mid) VALUES(?,?)',d) 
+        db.commit()  
+        
+    
+    
+def viewTBByName(TBName):
+    db =  sqlite3.connect("Group.db")
+    c = db.cursor()
+    c.execute("SELECT * FROM "+TBName)
+    print(c.fetchall()) 
+    
+def TestProject():
+    db =  sqlite3.connect("Group.db")
+    c = db.cursor()
+    
+    c.execute("SELECT name,Mid FROM NewGroupTB")
+    table1 = c.fetchall()
+    
+    c.execute("SELECT name,Mid FROM OldGroupTB")
+    table2 = c.fetchall()
+    
+    x = set(table1) 
+    x1 = set(table2) 
+    
+    result = x.symmetric_difference(x1)
+    differences = list(result)
+    print(differences)
+
+    for mem in differences:
+        #print(mem[1] + " MemberID: " + mem[2] + " left the group")
+        mid = mem[1] 
+        #print("mid: " + mid)
+        for id in table1:
+            MID = id[1]
+            #print("MID: " + MID)
+            if mid ==MID:
+                print(mem[0] + " MemberID: " + mem[1] + " new member added to the group")
+        
+        for n in table2:
+            mmid = n[1]
+            if mid == mmid:
+                print(mem[0] + " MemberID: " + mem[1] + " left the group")
+
+
+
+
+
+group_id = "********************"
+access_token = "***********************************************"
+
+
+getGroupMembers(group_id,access_token)
+#viewTB()
+viewTBByName("NewGroupTB")
+viewTBByName("OldGroupTB")
+ 
+TestProject()
+
+
+
