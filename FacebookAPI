@@ -5,7 +5,7 @@ Created on Mar 16, 2018
 To get the list of all members inside any Facebook Group and to find out if any member or members left the particular Group and 
 if any member or members added to that particular group 
 
-Prerequest :
+Prerequisite :
 1. Facebook Group ID
 2. Facebook API Access Token
 
@@ -29,9 +29,6 @@ from facepy import GraphAPI
 import sqlite3, time
 
 
-
-if __name__ == '__main__':
-    pass
 
 def getGroupMembers(group_id,access_token):
     graph = GraphAPI(access_token)
@@ -77,12 +74,10 @@ def TestProject():
     print(differences)
 
     for mem in differences:
-        #print(mem[1] + " MemberID: " + mem[2] + " left the group")
         mid = mem[1] 
-        #print("mid: " + mid)
+        
         for id in table1:
             MID = id[1]
-            #print("MID: " + MID)
             if mid ==MID:
                 print(mem[0] + " MemberID: " + mem[1] + " new member added to the group")
         
@@ -99,12 +94,12 @@ group_id = "********************"
 access_token = "***********************************************"
 
 
-getGroupMembers(group_id,access_token)
-#viewTB()
-viewTBByName("NewGroupTB")
-viewTBByName("OldGroupTB")
- 
-TestProject()
+if __name__ == '__main__':
+    getGroupMembers(group_id,access_token)
+    #viewTB()
+    viewTBByName("NewGroupTB")
+    viewTBByName("OldGroupTB")
+    TestProject()
 
 
 
